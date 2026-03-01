@@ -449,3 +449,49 @@
     padding: 1rem;
   }
 }
+/* Стили для цитаты */
+.about-quote {
+  font-style: italic;
+  font-size: 1.2rem;
+  color: var(--primary-color);
+  padding: 1.5rem;
+  background: linear-gradient(135deg, #667eea10 0%, #764ba210 100%);
+  border-radius: 20px;
+  border-left: 4px solid var(--primary-color);
+  margin-top: 1.5rem;
+  line-height: 1.6;
+  position: relative;
+}
+
+.about-quote::before {
+  content: '"';
+  font-size: 4rem;
+  color: var(--primary-color);
+  opacity: 0.3;
+  position: absolute;
+  top: -10px;
+  left: 10px;
+  font-family: serif;
+}
+
+/* Стили для сообщения об ошибке загрузки фото */
+.no-photos-message {
+  text-align: center;
+  padding: 4rem;
+  background: linear-gradient(135deg, #667eea10 0%, #764ba210 100%);
+  border-radius: 30px;
+  margin: 2rem 0;
+}
+
+.no-photos-message p {
+  font-size: 1.2rem;
+  color: #666;
+}
+
+/* Адаптивность для цитаты */
+@media (max-width: 768px) {
+  .about-quote {
+    font-size: 1rem;
+    padding: 1rem;
+  }
+}
