@@ -60,25 +60,25 @@ const About = () => {
       const { data, error } = await supabase
         .from("about")
         .select("*")
-        .eq("id", 1);
+        .eq("id", 1)
+        .single();
 
-      if (error) throw error;
+      if (error && error.code !== "PGRST116") throw error;
 
-      if (data && data.length > 0) {
-        // Данные есть - используем их
-        const aboutFromDb = data[0];
+      if (data) {
         setAboutData((prev) => ({
           ...prev,
-          ...aboutFromDb,
-          skills: aboutFromDb.skills || prev.skills,
-          stats: aboutFromDb.stats || prev.stats,
-          description: aboutFromDb.description || prev.description,
+          ...data,
+          // Важно! Преобразуем description в массив, если это не массив
+          description: Array.isArray(data.description)
+            ? data.description
+            : data.description
+              ? [data.description]
+              : prev.description,
+          // Аналогично для skills и stats
+          skills: Array.isArray(data.skills) ? data.skills : prev.skills,
+          stats: Array.isArray(data.stats) ? data.stats : prev.stats,
         }));
-      } else {
-        // Данных нет - оставляем значения по умолчанию
-        console.log(
-          "Нет данных в таблице about, используем значения по умолчанию",
-        );
       }
     } catch (error) {
       console.error("Ошибка загрузки данных:", error);
@@ -110,7 +110,7 @@ const About = () => {
           <div className="about-image-wrapper">
             <div className="about-image-container">
               <img
-                src={aboutData.mainPhoto}
+                src={aboutData.main_photo}
                 alt={aboutData.name}
                 className="about-image"
                 loading="lazy"
@@ -119,7 +119,7 @@ const About = () => {
                   if (e.target.src.includes("fallback")) return;
 
                   // Пытаемся загрузить локальную заглушку
-                  e.target.src = "/images/fallback-team.jpg";
+                  e.target.src = "/images/about/couple.jpg";
 
                   // Если и локальная не загрузится - убираем обработчик
                   e.target.onerror = null;
@@ -137,9 +137,20 @@ const About = () => {
             <p className="about-profession">{aboutData.profession}</p>
 
             <div className="about-description">
-              {aboutData.description.map((paragraph, index) => (
-                <p key={index}>{paragraph}</p>
-              ))}
+              {/* Проверяем, что description - это массив, и он не пустой */}
+              {Array.isArray(aboutData.description) &&
+              aboutData.description.length > 0 ? (
+                aboutData.description.map((paragraph, index) => (
+                  <p key={index}>{paragraph}</p>
+                ))
+              ) : (
+                // Если не массив или пусто, показываем значение по умолчанию
+                <p>
+                  Мы — семейная пара, которая превращает обычные залы в
+                  волшебные пространства.
+                </p>
+              )}
+
               {aboutData.quote && (
                 <p className="about-quote">{aboutData.quote}</p>
               )}

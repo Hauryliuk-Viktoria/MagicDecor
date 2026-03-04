@@ -1,48 +1,86 @@
-// import React from "react";
-// import { signOut } from "firebase/auth";
-// import { auth } from "../../firebase";
+import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import { supabase } from "../../lib/supabase";
+import PhotoManager from "./PhotoManager";
+import AboutEditor from "./AboutEditor";
+import SettingsEditor from "./SettingsEditor"; // Импортируем новый компонент
 import "./AdminDashboard.css";
 
 const AdminDashboard = () => {
+  const [activeTab, setActiveTab] = useState("photos");
+  const [user, setUser] = useState(null);
+  const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
+
+  useEffect(() => {
+    getUser();
+  }, []);
+
+  const getUser = async () => {
+    try {
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
+      setUser(user);
+    } catch (error) {
+      console.error("Ошибка получения пользователя:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const handleLogout = async () => {
     try {
-      await signOut(auth);
+      const { error } = await supabase.auth.signOut();
+      if (error) throw error;
       navigate("/admin/login");
     } catch (error) {
       console.error("Ошибка выхода:", error);
+      alert("Не удалось выйти");
     }
   };
+
+  if (loading) {
+    return <div className="loading-spinner">Загрузка...</div>;
+  }
 
   return (
     <div className="admin-dashboard">
       <header className="dashboard-header">
-        <h1>MagicDecor Admin</h1>
+        <div className="header-left">
+          <h1>MagicDecor Admin</h1>
+          {user && <span className="welcome-text">{user.email}</span>}
+        </div>
         <button onClick={handleLogout} className="logout-btn">
           Выйти
         </button>
       </header>
 
-      <div className="dashboard-grid">
-        <div className="dashboard-card">
-          <h3>📸 Управление фото</h3>
-          <p>Загрузка, удаление и сортировка фотографий</p>
-          <button className="card-btn">Перейти</button>
-        </div>
+      <div className="dashboard-tabs">
+        <button
+          className={`tab-btn ${activeTab === "photos" ? "active" : ""}`}
+          onClick={() => setActiveTab("photos")}
+        >
+          📸 Фотографии
+        </button>
+        <button
+          className={`tab-btn ${activeTab === "about" ? "active" : ""}`}
+          onClick={() => setActiveTab("about")}
+        >
+          👥 О нас
+        </button>
+        <button
+          className={`tab-btn ${activeTab === "settings" ? "active" : ""}`}
+          onClick={() => setActiveTab("settings")}
+        >
+          ⚙️ Настройки
+        </button>
+      </div>
 
-        <div className="dashboard-card">
-          <h3>📝 Редактирование текстов</h3>
-          <p>Изменение информации на странице "О нас"</p>
-          <button className="card-btn">Перейти</button>
-        </div>
-
-        <div className="dashboard-card">
-          <h3>⚙️ Настройки</h3>
-          <p>Общие настройки сайта</p>
-          <button className="card-btn">Перейти</button>
-        </div>
+      <div className="dashboard-content">
+        {activeTab === "photos" && <PhotoManager />}
+        {activeTab === "about" && <AboutEditor />}
+        {activeTab === "settings" && <SettingsEditor />}
       </div>
     </div>
   );
