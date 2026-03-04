@@ -1,7 +1,45 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
+import { supabase } from "../../lib/supabase";
 import "./Contacts.css";
 
 const Contacts = () => {
+  const [settings, setSettings] = useState({
+    phone: "+7 (999) 123-45-67",
+    email: "info@magicdecor.ru",
+    address: "Москва, ул. Декоративная, 15",
+    work_hours: "Ежедневно с 10:00 до 21:00",
+    instagram: "https://instagram.com/magicdecor",
+    vk: "https://vk.com/magicdecor",
+    telegram: "https://t.me/magicdecor",
+    map_lat: "55.755825",
+    map_lng: "37.617633",
+    map_address: "Москва, ул. Декоративная, 15",
+  });
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    fetchContactsData();
+  }, []);
+
+  const fetchContactsData = async () => {
+    try {
+      const { data, error } = await supabase
+        .from("settings")
+        .select("*")
+        .eq("id", 1)
+        .single();
+
+      if (error) throw error;
+      if (data) {
+        setSettings(data);
+      }
+    } catch (error) {
+      console.error("Ошибка загрузки контактов:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const [formData, setFormData] = useState({
     name: "",
     email: "",
@@ -82,8 +120,8 @@ const Contacts = () => {
                 </div>
                 <div className="info-content">
                   <h4>Телефон</h4>
-                  <a href="tel:+79991234567">+7 (999) 123-45-67</a>
-                  <p className="info-note">Ежедневно с 10:00 до 21:00</p>
+                  <a href={`tel:${settings.phone}`}>{settings.phone}</a>
+                  <p className="info-note">{settings.work_hours}</p>
                 </div>
               </div>
 
@@ -102,7 +140,7 @@ const Contacts = () => {
                 </div>
                 <div className="info-content">
                   <h4>Email</h4>
-                  <a href="mailto:info@magicdecor.ru">info@magicdecor.ru</a>
+                  <a href={`mailto:${settings.email}`}>{settings.email}</a>
                   <p className="info-note">Отвечаем в течение 2 часов</p>
                 </div>
               </div>
@@ -121,8 +159,8 @@ const Contacts = () => {
                   </svg>
                 </div>
                 <div className="info-content">
-                  <h4>Шоурум</h4>
-                  <p>Москва, ул. Декоративная, 15</p>
+                  <h4>Адрес</h4>
+                  <p>{settings.address}</p>
                   <p className="info-note">Встречи по предварительной записи</p>
                 </div>
               </div>
@@ -132,7 +170,7 @@ const Contacts = () => {
                 <h4>Мы в соцсетях</h4>
                 <div className="social-links">
                   <a
-                    href="#"
+                    href={settings.instagram}
                     className="social-link"
                     target="_blank"
                     rel="noopener noreferrer"
@@ -143,7 +181,7 @@ const Contacts = () => {
                     <span>Instagram</span>
                   </a>
                   <a
-                    href="#"
+                    href={settings.vk}
                     className="social-link"
                     target="_blank"
                     rel="noopener noreferrer"
@@ -154,7 +192,7 @@ const Contacts = () => {
                     <span>VK</span>
                   </a>
                   <a
-                    href="#"
+                    href={settings.telegram}
                     className="social-link"
                     target="_blank"
                     rel="noopener noreferrer"
@@ -290,7 +328,7 @@ const Contacts = () => {
         {/* Карта */}
         <div className="contacts-map">
           <iframe
-            src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d2245.372847345692!2d37.61763331552307!3d55.75582598055434!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x46b54a5a4c5ca5c7%3A0x4c0d3c3c3c3c3c3c!2z0JzQvtGB0LrQstCwLCDQoNC-0YHRgdC40Y8!5e0!3m2!1sru!2s!4v1620000000000!5m2!1sru!2s"
+            src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d38291.260439632344!2d24.398807731120595!3d53.142437290925535!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x46df9cdc3e995c81%3A0xc75a78abc7288353!2z0JLQvtC70LrQvtCy0YvRgdC6LCDQk9GA0L7QtNC90LXQvdGB0LrQsNGPINC-0LHQu9Cw0YHRgtGM!5e0!3m2!1sru!2sby!4v1772458217996!5m2!1sru!2sby"
             title="Карта"
             allowFullScreen=""
             loading="lazy"

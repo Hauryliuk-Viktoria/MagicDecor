@@ -1,7 +1,42 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
+import { supabase } from "../../lib/supabase";
 
 const Footer = () => {
   const currentYear = new Date().getFullYear();
+  useEffect(() => {
+    fetchContactsData();
+  }, []);
+  const [settings, setSettings] = useState({
+    phone: "+7 (999) 123-45-67",
+    email: "info@magicdecor.ru",
+    address: "Москва, ул. Декоративная, 15",
+    work_hours: "Ежедневно с 10:00 до 21:00",
+    instagram: "https://instagram.com/magicdecor",
+    vk: "https://vk.com/magicdecor",
+    telegram: "https://t.me/magicdecor",
+    map_lat: "55.755825",
+    map_lng: "37.617633",
+    map_address: "Москва, ул. Декоративная, 15",
+  });
+
+  const fetchContactsData = async () => {
+    try {
+      const { data, error } = await supabase
+        .from("settings")
+        .select("*")
+        .eq("id", 1)
+        .single();
+
+      if (error) throw error;
+      if (data) {
+        setSettings(data);
+      }
+    } catch (error) {
+      console.error("Ошибка загрузки контактов:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
     <footer className="footer">
@@ -51,9 +86,9 @@ const Footer = () => {
           <div className="footer-section">
             <h4>Контакты</h4>
             <ul>
-              <li>Email: info@magicdecor.ru</li>
-              <li>Тел: +7 (999) 123-45-67</li>
-              <li>Москва, ул. Декоративная, 15</li>
+              <li>Email: {settings.email}</li>
+              <li>Тел: {settings.phone}</li>
+              <li>{settings.address}</li>
             </ul>
           </div>
         </div>
